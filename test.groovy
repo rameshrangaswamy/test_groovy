@@ -1,14 +1,14 @@
 pipeline {
-    agent { node { label 'testgroup' } }
+    agent any
     tools {
         maven 'maven'
-        scannerHome = tool 'demoscanner'
+       // scannerHome = tool 'demoscanner'
     }
     options {
       skipDefaultCheckout true
     }
     stages {
-        stage('Deploy') {
+        stage('checkout and deploy') {
             steps {
                 // clone project and install dependencies
                 git url: 'https://github.com/rameshrangaswamy/demoCICDjob.git', branch: 'master'
@@ -21,7 +21,7 @@ pipeline {
                   install -Dmaven.test.failure.ignore=true || true'''
             }
         }
-                stage('Report') {
+                stage('Analysis & Report') {
             steps {
                  writeFile file: "${pwd()}/sonar-project.properties", text: """
                  #Mandatory meta data required
@@ -35,12 +35,13 @@ pipeline {
                  sonar.language=java
                  sonar.java.binaries=target/
                  """
-             }
-         }
-            stage('sonaranalysis') {
-            withSonarQubeEnv('My SonarQube Server') {
+          //   }
+        // }
+         //   stage('sonaranalysis') {
+            withSonarQubeEnv('SonarDemo') {
                  sh 'mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install -U -Dmaven.test.failure.ignore=true org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar'
          }
             }
     }
+}
 }
